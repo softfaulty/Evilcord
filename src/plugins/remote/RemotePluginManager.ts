@@ -17,14 +17,29 @@
 */
 
 import { Settings } from "@api/Settings";
+import { Logger } from "@utils/Logger";
 
+import { REMOTE_PLUGIN_REGISTRY_URL } from "./constants";
 import type { InstalledRemotePlugin, RemotePluginManifest, RemotePluginRegistry } from "./types";
+
+const logger = new Logger("RemotePluginManager", "#babbf1");
 
 export const RemotePluginManager = {
     async fetchRegistry(): Promise<RemotePluginRegistry> {
-        return {
-            plugins: []
-        };
+        const response = await fetch(REMOTE_PLUGIN_REGISTRY_URL);
+
+        if (!response.ok)
+            throw new Error(`Failed to fetch remote plugin registry: ${response.status} ${response.statusText}`);
+
+        const registry = await response.json() as RemotePluginRegistry;
+
+        if (IS_DEV)
+            logger.info(
+                "Fetched remote plugins:",
+                registry.plugins.map(plugin => plugin.name).join(", ") || "none"
+            );
+
+        return registry;
     },
 
     async getRemotePlugins(): Promise<RemotePluginManifest[]> {
