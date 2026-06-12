@@ -37,3 +37,23 @@ export type RemotePluginManifest = {
 export type RemotePluginRegistry = {
     plugins: RemotePluginManifest[];
 };
+
+export type InstalledRemotePlugin = {
+    id: string;
+    name: string;
+    version: string;
+    enabled: boolean;
+    localPath: string;
+    hash: string;
+    installedAt: number;
+
+    previousVersion?: string;
+    previousLocalPath?: string;
+    previousHash?: string;
+};
+
+export type RemotePluginHealth = {
+    crashCount: number;
+    lastCrash?: string;
+    disabledBySafety: boolean;
+};
