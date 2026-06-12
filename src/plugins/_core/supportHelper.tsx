@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getAvailablePluginMeta, getAvailablePlugins } from "@api/AvailablePlugins";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
@@ -39,9 +40,11 @@ import { Button, ChannelStore, ConfirmModal, Forms, GuildMemberStore, openModal,
 import { JSX } from "react";
 
 import gitHash from "~git-hash";
-import plugins, { PluginMeta } from "~plugins";
 
 import SettingsPlugin from "./settings";
+
+const plugins = getAvailablePlugins();
+const availablePluginMeta = getAvailablePluginMeta();
 
 const CodeBlockRe = /```js\n(.+?)```/s;
 
@@ -99,7 +102,7 @@ async function generateDebugInfoMessage() {
     const commonIssues = {
         "Activity Sharing disabled": tryOrElse(() => !ShowCurrentGame.getSetting(), false),
         "Vencord DevBuild": !IS_STANDALONE,
-        "Has UserPlugins": Object.values(PluginMeta).some(m => m.userPlugin),
+        "Has UserPlugins": Object.values(availablePluginMeta).some(m => m.userPlugin),
         "More than two weeks out of date": BUILD_TIMESTAMP < Date.now() - 12096e5,
     };
 
@@ -117,8 +120,8 @@ function generatePluginList() {
     const enabledPlugins = Object.keys(plugins)
         .filter(p => isPluginEnabled(p) && !isApiPlugin(p));
 
-    const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin);
-    const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin);
+    const enabledStockPlugins = enabledPlugins.filter(p => !availablePluginMeta[p].userPlugin);
+    const enabledUserPlugins = enabledPlugins.filter(p => availablePluginMeta[p].userPlugin);
 
 
     let content = `**Enabled Plugins (${enabledStockPlugins.length}):**\n${makeCodeblock(enabledStockPlugins.join(", "))}`;

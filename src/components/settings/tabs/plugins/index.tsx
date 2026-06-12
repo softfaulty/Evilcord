@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { getAvailablePlugins } from "@api/AvailablePlugins";
+import { getAvailablePluginMeta, getAvailablePlugins, getExcludedPlugins } from "@api/AvailablePlugins";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
@@ -39,14 +39,14 @@ import { PluginTag, PluginTags } from "@utils/types";
 import { Button, ConfirmModal,lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { ExcludedPlugins, PluginMeta } from "~plugins";
-
 import { PluginCard } from "./PluginCard";
 import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 const availablePlugins = getAvailablePlugins();
+const availablePluginMeta = getAvailablePluginMeta();
+const excludedPlugins = getExcludedPlugins();
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -85,7 +85,7 @@ const enum SearchStatus {
 
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = search
-        ? Object.entries(ExcludedPlugins)
+        ? Object.entries(excludedPlugins)
             .filter(([name]) => name.toLowerCase().includes(search))
         : [];
 
@@ -164,7 +164,7 @@ function PluginSettings() {
         []
     );
 
-    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(availablePluginMeta).some(m => m.userPlugin), []);
 
     const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
 
@@ -185,7 +185,7 @@ function PluginSettings() {
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
             case SearchStatus.USER_PLUGINS:
-                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                if (!availablePluginMeta[plugin.name]?.userPlugin) return false;
                 break;
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;

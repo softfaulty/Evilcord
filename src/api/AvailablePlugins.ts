@@ -16,8 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Plugins from "~plugins";
+import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
 export function getAvailablePlugins() {
     return Plugins;
+}
+
+export function getAvailablePluginMeta() {
+    return PluginMeta;
+}
+
+export function getExcludedPlugins() {
+    return ExcludedPlugins;
 }

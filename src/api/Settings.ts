@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getAvailablePlugins } from "@api/AvailablePlugins";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React, useEffect } from "@webpack/common";
 
-import plugins from "~plugins";
-
 const logger = new Logger("Settings");
+const plugins = getAvailablePlugins();
 
 export interface SettingsPluginUiElement {
     enabled: boolean;

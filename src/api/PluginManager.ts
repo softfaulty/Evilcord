@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { getAvailablePlugins } from "@api/AvailablePlugins";
 import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
@@ -36,7 +37,7 @@ import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
-import Plugins from "~plugins";
+const Plugins = getAvailablePlugins();
 export { Plugins as plugins };
 const logger = new Logger("PluginManager", "#a6d189");
 

@@ -17,7 +17,7 @@
 */
 
 // DO NOT REMOVE UNLESS YOU WISH TO FACE THE WRATH OF THE CIRCULAR DEPENDENCY DEMON!!!!!!!
-import "~plugins";
+import "@api/AvailablePlugins";
 import "./fixWeirdAppRegionBug.css";
 
 export * as Api from "./api";

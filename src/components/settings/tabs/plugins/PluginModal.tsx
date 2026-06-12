@@ -18,6 +18,7 @@
 
 import "./PluginModal.css";
 
+import { getAvailablePluginMeta } from "@api/AvailablePlugins";
 import { generateId } from "@api/Commands";
 import { hasAnyVisibleSettings, isSettingHidden } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
@@ -35,13 +36,12 @@ import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, Forms, Modal,openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
-import { PluginMeta } from "~plugins";
-
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
+const availablePluginMeta = getAvailablePluginMeta();
 
 const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
@@ -164,7 +164,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
-    const pluginMeta = PluginMeta[plugin.name];
+    const pluginMeta = availablePluginMeta[plugin.name];
 
     return (
         <Modal

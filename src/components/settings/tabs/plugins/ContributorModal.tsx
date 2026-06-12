@@ -6,6 +6,7 @@
 
 import "./ContributorModal.css";
 
+import { getAvailablePlugins } from "@api/AvailablePlugins";
 import { useSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
@@ -15,12 +16,11 @@ import { classes, pluralise } from "@utils/misc";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { Forms, Modal,openModal, showToast, useEffect, useMemo, UserProfileStore, useStateFromStores } from "@webpack/common";
 
-import Plugins from "~plugins";
-
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
 import { PluginCard } from "./PluginCard";
 
 const cl = classNameFactory("vc-author-modal-");
+const availablePlugins = getAvailablePlugins();
 
 export function openContributorModal(user: User) {
     openModal(modalProps => <ContributorModal user={user} modalProps={modalProps} />);
@@ -40,7 +40,7 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
     const website = profile?.connectedAccounts?.find(a => a.type === "domain")?.name;
 
     const plugins = useMemo(() => {
-        const allPlugins = Object.values(Plugins);
+        const allPlugins = Object.values(availablePlugins);
         const pluginsByAuthor = DevsById[user.id]
             ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
             : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
