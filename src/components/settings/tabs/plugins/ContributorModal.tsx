@@ -6,7 +6,7 @@
 
 import "./ContributorModal.css";
 
-import { getAvailablePlugins } from "@api/AvailablePlugins";
+import { getBundledPlugins } from "@api/AvailablePlugins";
 import { useSettings } from "@api/Settings";
 import { Link } from "@components/Link";
 import { DevsById } from "@utils/constants";
@@ -20,7 +20,7 @@ import { GithubButton, WebsiteButton } from "./LinkIconButton";
 import { PluginCard } from "./PluginCard";
 
 const cl = classNameFactory("vc-author-modal-");
-const availablePlugins = getAvailablePlugins();
+const availablePlugins = getBundledPlugins();
 
 export function openContributorModal(user: User) {
     openModal(modalProps => <ContributorModal user={user} modalProps={modalProps} />);

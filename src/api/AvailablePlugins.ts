@@ -16,16 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
+import * as BundledPluginSource from "~plugins";
 
-export function getAvailablePlugins() {
-    return Plugins;
+export function getBundledPlugins() {
+    return BundledPluginSource.default ?? {};
+}
+
+export async function getAvailablePlugins() {
+    return getBundledPlugins();
 }
 
 export function getAvailablePluginMeta() {
-    return PluginMeta;
+    return BundledPluginSource.PluginMeta ?? {};
 }
 
 export function getExcludedPlugins() {
-    return ExcludedPlugins;
+    return BundledPluginSource.ExcludedPlugins ?? {};
 }

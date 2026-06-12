@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getAvailablePluginMeta, getAvailablePlugins } from "@api/AvailablePlugins";
+import { getAvailablePluginMeta, getBundledPlugins } from "@api/AvailablePlugins";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
@@ -43,7 +43,7 @@ import gitHash from "~git-hash";
 
 import SettingsPlugin from "./settings";
 
-const plugins = getAvailablePlugins();
+const plugins = getBundledPlugins();
 const availablePluginMeta = getAvailablePluginMeta();
 
 const CodeBlockRe = /```js\n(.+?)```/s;

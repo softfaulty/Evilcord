@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getAvailablePlugins } from "@api/AvailablePlugins";
+import { getBundledPlugins } from "@api/AvailablePlugins";
 import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
@@ -37,8 +37,23 @@ import { FluxEvents } from "@vencord/discord-types";
 import { FluxDispatcher } from "@webpack/common";
 import { patches } from "@webpack/patcher";
 
-const Plugins = getAvailablePlugins();
-export { Plugins as plugins };
+type PluginMap = ReturnType<typeof getBundledPlugins>;
+
+function getPlugins() {
+    return getBundledPlugins();
+}
+
+export const plugins = new Proxy({} as PluginMap, {
+    get: (_, prop) => getPlugins()[prop as keyof PluginMap],
+    getOwnPropertyDescriptor: (_, prop) => Object.getOwnPropertyDescriptor(getPlugins(), prop),
+    has: (_, prop) => prop in getPlugins(),
+    ownKeys: () => Reflect.ownKeys(getPlugins()),
+    set: (_, prop, value) => {
+        getPlugins()[prop as keyof PluginMap] = value;
+        return true;
+    }
+});
+
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
@@ -48,6 +63,8 @@ let enabledPluginsSubscribedFlux = false;
 const subscribedFluxEventsPlugins = new Set<string>();
 
 export function isPluginEnabled(p: string) {
+    const Plugins = getPlugins();
+
     return (
         Plugins[p]?.required ||
         Plugins[p]?.isDependency ||
@@ -118,6 +135,8 @@ export function pluginRequiresRestart(p: Plugin) {
 }
 
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
+    const Plugins = getPlugins();
+
     logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins) {
         if (isPluginEnabled(name) && (!IS_REPORTER || isReporterTestable(Plugins[name], ReporterTestable.Start))) {
@@ -132,6 +151,7 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
 });
 
 export function startDependenciesRecursive(p: Plugin) {
+    const Plugins = getPlugins();
     const settings = Settings.plugins;
     let restartNeeded = false;
     const failures: string[] = [];
@@ -193,6 +213,8 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
 }
 
 export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatcher) {
+    const Plugins = getPlugins();
+
     enabledPluginsSubscribedFlux = true;
 
     for (const name in Plugins) {
@@ -326,6 +348,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 }, p => `stopPlugin ${p.name}`);
 
 export const initPluginManager = onlyOnce(function init() {
+    const Plugins = getPlugins();
     const pluginsValues = Object.values(Plugins);
     const settings = Settings.plugins;
 

@@ -18,7 +18,7 @@
 
 import "./styles.css";
 
-import { getAvailablePluginMeta, getAvailablePlugins, getExcludedPlugins } from "@api/AvailablePlugins";
+import { getAvailablePluginMeta, getAvailablePlugins, getBundledPlugins, getExcludedPlugins } from "@api/AvailablePlugins";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
@@ -44,7 +44,7 @@ import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
-const availablePlugins = getAvailablePlugins();
+type AvailablePlugins = Awaited<ReturnType<typeof getAvailablePlugins>>;
 const availablePluginMeta = getAvailablePluginMeta();
 const excludedPlugins = getExcludedPlugins();
 
@@ -120,6 +120,10 @@ function PluginSettings() {
     const settings = useSettings();
     const changeRef = useRef<ChangeList<string>>(null);
     const changes = changeRef.current ??= new ChangeList<string>();
+    const [availablePlugins] = useAwaiter(async () => {
+        const plugins = await getAvailablePlugins();
+        return plugins;
+    }, { fallbackValue: getBundledPlugins() });
 
     useCleanupEffect(() => {
         if (changes.hasChanges)
@@ -157,11 +161,11 @@ function PluginSettings() {
             }
         }
         return o;
-    }, []);
+    }, [availablePlugins]);
 
     const sortedPlugins = useMemo(() =>
         Object.values(availablePlugins).sort((a, b) => a.name.localeCompare(b.name)),
-        []
+        [availablePlugins]
     );
 
     const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(availablePluginMeta).some(m => m.userPlugin), []);
@@ -171,7 +175,7 @@ function PluginSettings() {
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
-    const pluginFilter = (plugin: typeof availablePlugins[keyof typeof availablePlugins]) => {
+    const pluginFilter = (plugin: AvailablePlugins[keyof AvailablePlugins]) => {
         const { status, tags } = searchValue;
 
         switch (status) {
@@ -219,7 +223,7 @@ function PluginSettings() {
         DataStore.set("Vencord_existingPlugins", existingTimestamps);
 
         return lodash.isEqual(newPlugins, sortedPluginNames) ? [] : newPlugins;
-    }));
+    }), { fallbackValue: null, deps: [sortedPlugins] });
 
     const plugins = [] as JSX.Element[];
     const requiredPlugins = [] as JSX.Element[];

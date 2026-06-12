@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { getAvailablePlugins } from "@api/AvailablePlugins";
+import { getBundledPlugins } from "@api/AvailablePlugins";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
@@ -24,7 +24,6 @@ import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from 
 import { React, useEffect } from "@webpack/common";
 
 const logger = new Logger("Settings");
-const plugins = getAvailablePlugins();
 
 export interface SettingsPluginUiElement {
     enabled: boolean;
@@ -140,6 +139,7 @@ export const SettingsStore = new SettingsStoreClass(settings, {
         path
     }) {
         const v = target[key];
+        const plugins = getBundledPlugins();
         if (!plugins) return v; // plugins not initialised yet. this means this path was reached by being called on the top level
 
         if (path === "plugins" && key in plugins)
@@ -232,11 +232,13 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 }
 
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
+    const availablePlugins = getBundledPlugins();
     const { plugins } = SettingsStore.plain;
-    if (name in plugins) return;
+    if (!availablePlugins) return;
+    if (name in availablePlugins) return;
 
     for (const oldName of oldNames) {
-        if (oldName in plugins) {
+        if (oldName in availablePlugins) {
             logger.info(`Migrating settings from old name ${oldName} to ${name}`);
             plugins[name] = plugins[oldName];
             delete plugins[oldName];
