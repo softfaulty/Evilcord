@@ -17,6 +17,7 @@
 */
 
 import { getBundledPlugins } from "@api/AvailablePlugins";
+import type { InstalledRemotePlugin, RemotePluginHealth } from "@plugins/remote/types";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
@@ -70,6 +71,11 @@ export interface Settings {
             [setting: string]: any;
         };
     };
+    remotePlugins: {
+        installed: Record<string, InstalledRemotePlugin>;
+        health: Record<string, RemotePluginHealth>;
+        safeMode: boolean;
+    };
 
     uiElements: {
         messagePopoverButtons: SettingsPluginUiElements;
@@ -107,6 +113,11 @@ const DefaultSettings: Settings = {
     disableMinSize: false,
     winNativeTitleBar: false,
     plugins: {},
+    remotePlugins: {
+        installed: {},
+        health: {},
+        safeMode: false
+    },
 
     uiElements: {
         chatBarButtons: {},
