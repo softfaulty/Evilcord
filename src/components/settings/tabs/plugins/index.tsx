@@ -18,6 +18,7 @@
 
 import "./styles.css";
 
+import { getAvailablePlugins } from "@api/AvailablePlugins";
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
@@ -38,13 +39,14 @@ import { PluginTag, PluginTags } from "@utils/types";
 import { Button, ConfirmModal,lodash, openModal, Parser, React, SearchableSelect, Select, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
+import { ExcludedPlugins, PluginMeta } from "~plugins";
 
 import { PluginCard } from "./PluginCard";
 import { UIElementsButton } from "./UIElements";
 
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
+const availablePlugins = getAvailablePlugins();
 
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
@@ -145,8 +147,8 @@ function PluginSettings() {
 
     const depMap = useMemo(() => {
         const o = {} as Record<string, string[]>;
-        for (const plugin in Plugins) {
-            const deps = Plugins[plugin].dependencies;
+        for (const plugin in availablePlugins) {
+            const deps = availablePlugins[plugin].dependencies;
             if (deps) {
                 for (const dep of deps) {
                     o[dep] ??= [];
@@ -158,7 +160,7 @@ function PluginSettings() {
     }, []);
 
     const sortedPlugins = useMemo(() =>
-        Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
+        Object.values(availablePlugins).sort((a, b) => a.name.localeCompare(b.name)),
         []
     );
 
@@ -169,7 +171,7 @@ function PluginSettings() {
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
-    const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
+    const pluginFilter = (plugin: typeof availablePlugins[keyof typeof availablePlugins]) => {
         const { status, tags } = searchValue;
 
         switch (status) {
