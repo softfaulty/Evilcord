@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+export type RemotePluginLoadType = "boot" | "lazy";
+
 export type RemotePluginManifest = {
     id: string;
     name: string;
@@ -25,13 +27,13 @@ export type RemotePluginManifest = {
     downloadUrl: string;
     hash: string;
     tags: string[];
+    pluginApiVersion: string;
+    loadType: RemotePluginLoadType;
 
-    pluginApiVersion?: string;
     minClientVersion?: string;
     maxClientVersion?: string;
     discordBuild?: string;
     changelog?: string;
-    loadType?: "boot" | "lazy";
 };
 
 export type RemotePluginRegistry = {

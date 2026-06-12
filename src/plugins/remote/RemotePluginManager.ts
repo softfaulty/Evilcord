@@ -24,6 +24,44 @@ import type { InstalledRemotePlugin, RemotePluginManifest, RemotePluginRegistry 
 
 const logger = new Logger("RemotePluginManager", "#babbf1");
 
+const requiredManifestFields = [
+    "id",
+    "name",
+    "description",
+    "author",
+    "version",
+    "downloadUrl",
+    "hash"
+] as const;
+
+function isObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+}
+
+function assertRegistryShape(value: unknown): asserts value is RemotePluginRegistry {
+    if (!isObject(value) || !Array.isArray(value.plugins))
+        throw new Error("Invalid remote plugin registry: plugins must be an array");
+
+    value.plugins.forEach((plugin, index) => {
+        if (!isObject(plugin))
+            throw new Error(`Invalid remote plugin registry: plugin ${index} must be an object`);
+
+        for (const field of requiredManifestFields) {
+            if (typeof plugin[field] !== "string" || plugin[field] === "")
+                throw new Error(`Invalid remote plugin registry: plugin ${index} is missing ${field}`);
+        }
+
+        if (!Array.isArray(plugin.tags) || plugin.tags.some(tag => typeof tag !== "string"))
+            throw new Error(`Invalid remote plugin registry: plugin ${index} has invalid tags`);
+
+        if (typeof plugin.pluginApiVersion !== "string" || plugin.pluginApiVersion === "")
+            throw new Error(`Invalid remote plugin registry: plugin ${index} is missing pluginApiVersion`);
+
+        if (plugin.loadType !== "lazy" && plugin.loadType !== "boot")
+            throw new Error(`Invalid remote plugin registry: plugin ${index} has invalid loadType`);
+    });
+}
+
 export const RemotePluginManager = {
     async fetchRegistry(): Promise<RemotePluginRegistry> {
         const response = await fetch(REMOTE_PLUGIN_REGISTRY_URL);
@@ -31,7 +69,8 @@ export const RemotePluginManager = {
         if (!response.ok)
             throw new Error(`Failed to fetch remote plugin registry: ${response.status} ${response.statusText}`);
 
-        const registry = await response.json() as RemotePluginRegistry;
+        const registry = await response.json() as unknown;
+        assertRegistryShape(registry);
 
         if (IS_DEV)
             logger.info(
